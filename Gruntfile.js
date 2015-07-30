@@ -14,6 +14,10 @@ module.exports = function(grunt) {
       }
     },
 
+    clean: {
+      js: ["*/**/*.min.js"]
+    },
+
     nodemon: {
       dev: {
         script: 'server.js'
@@ -21,11 +25,18 @@ module.exports = function(grunt) {
     },
 
     uglify: {
+      options: {
+        mangle: false
+      },
+      my_target: {
+        files: {
+          'public/dist/output.min.js': ['public/client/*.js']
+        }
+      }
     },
 
     jshint: {
-      files: [
-        // Add filespec list here
+      files: [ 'Gruntfile.js', 'views/*.js', 'public/**/*.js', 'app/**/*.js'
       ],
       options: {
         force: 'true',
@@ -38,7 +49,16 @@ module.exports = function(grunt) {
     },
 
     cssmin: {
-        // Add filespec list here
+      target:{
+        files: [{
+          expand: true,
+          cwd: 'public',
+          src: ['*.css', '!*.min.css'],
+          dest: 'public',
+          ext: '.min.css'
+        }]
+        
+      }
     },
 
     watch: {
@@ -72,6 +92,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-nodemon');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
   grunt.registerTask('server-dev', function (target) {
     // Running nodejs in a different process and displaying output on the main console
@@ -91,21 +112,28 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
-    'mochaTest'
+    'jshint',
+    'mochaTest',
   ]);
 
   grunt.registerTask('build', [
+    'test',
+    'clean',
+    'uglify',
+    'cssmin'
   ]);
 
   grunt.registerTask('upload', function(n) {
     if(grunt.option('prod')) {
       // add your production server task here
+
     } else {
       grunt.task.run([ 'server-dev' ]);
     }
   });
 
   grunt.registerTask('deploy', [
+    'deploy'
       // add your production server task here
   ]);
 
